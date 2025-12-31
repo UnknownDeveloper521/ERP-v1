@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  /* Blue + Yellow Enterprise Theme */
+  --color-background: #FFFFFF; /* Pure white background */
+  --color-foreground: #333333; /* Dark grey text for readability */
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #333333;
+
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #333333;
+
+  --color-primary: #0056B8; /* Primary Blue */
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: #F5F5F5; /* Light grey background */
+  --color-secondary-foreground: #333333;
+
+  --color-muted: #F5F5F5;
+  --color-muted-foreground: #666666; /* Soft grey text */
+
+  --color-accent: #FFB800; /* Bright yellow accent */
+  --color-accent-foreground: #003C7A; /* Dark navy on yellow */
+
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FFFFFF;
+
+  --color-border: #E5E7EB;
+  --color-input: #F5F5F5;
+  --color-ring: #0056B8;
+
+  --color-chart-1: #0056B8; /* Primary Blue */
+  --color-chart-2: #4A8FE0; /* Light Blue */
+  --color-chart-3: #FFB800; /* Yellow */
+  --color-chart-4: #10B981; /* Green */
+  --color-chart-5: #8B5CF6; /* Purple */
+
+  --color-sidebar: #003C7A; /* Dark Navy Sidebar */
+  --color-sidebar-foreground: #FFFFFF;
+  --color-sidebar-primary: #0056B8;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: #FFB800; /* Yellow accent on sidebar */
+  --color-sidebar-accent-foreground: #003C7A;
+  --color-sidebar-border: #1E40AF;
+  --color-sidebar-ring: #4A8FE0;
+
+  --font-sans: 'Inter', sans-serif;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
