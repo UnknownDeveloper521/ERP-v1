@@ -4,15 +4,12 @@ import { createClient } from "@supabase/supabase-js";
 // Get it from: https://app.supabase.co/project/zpecwgqgsjwjrfrfrzzq/settings/api
 // Under "anon public" section - copy the FULL key
 
-const SUPABASE_URL = "https://zpecwgqgsjwjrfrfrzzq.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_CORRECT_ANON_KEY_HERE"; // 👈 REPLACE THIS!
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://zpecwgqgsjwjrfrfrzzq.supabase.co";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (SUPABASE_ANON_KEY === "YOUR_CORRECT_ANON_KEY_HERE") {
-  console.error(
-    "❌ CRITICAL: Invalid API Key!\n" +
-    "Please copy your CORRECT Supabase anon key from:\n" +
-    "https://app.supabase.co/project/zpecwgqgsjwjrfrfrzzq/settings/api\n" +
-    "Then replace 'YOUR_CORRECT_ANON_KEY_HERE' in client/src/lib/supabase.ts"
+if (!SUPABASE_ANON_KEY) {
+  throw new Error(
+    "Missing Supabase configuration. Set VITE_SUPABASE_ANON_KEY (and optionally VITE_SUPABASE_URL) in your .env file."
   );
 }
 
@@ -38,6 +35,13 @@ export const getCurrentUser = async () => {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
+};
+
+export const getAccessToken = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
 };
 
 export const onAuthStateChange = (callback: (user: any) => void) => {

@@ -124,7 +124,7 @@ export default function Login() {
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="flex w-full flex-col justify-center bg-background p-8 lg:w-1/2 lg:p-12">
+        <div className="w-full lg:w-1/2 bg-background p-8 lg:p-10 flex flex-col justify-center">
           <div className="mx-auto w-full max-w-md space-y-6">
             <div className="space-y-2 text-center lg:text-left">
               <h2 className="text-3xl font-bold tracking-tight">Welcome back</h2>
@@ -181,8 +181,17 @@ export default function Login() {
                 <Label htmlFor="remember" className="font-normal">Remember me for 30 days</Label>
               </div>
 
-              <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setLocation("/register")}
+              >
+                New here? Create an account
               </Button>
             </form>
 

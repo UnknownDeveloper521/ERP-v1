@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   CreditCard,
   Briefcase,
+  MessageSquare,
   Settings,
   Menu,
   Bell,
@@ -64,6 +65,7 @@ const Sidebar = ({ className }: SidebarProps) => {
 
   const moduleConfig: { [key: string]: { name: string; icon: any; path: string; subItems?: { name: string; path: string }[] } } = {
     "Dashboard": { name: "Dashboard", icon: LayoutDashboard, path: "/" },
+    "Chat": { name: "Chat", icon: MessageSquare, path: "/chat" },
     "HRMS": { 
       name: "HRMS & Payroll", 
       icon: Users, 
@@ -88,7 +90,7 @@ const Sidebar = ({ className }: SidebarProps) => {
     "System": { name: "Users & Roles", icon: Settings, path: "/settings" },
   };
 
-  const coreModules = ["Dashboard", "HRMS", "Products", "Inventory", "Sales", "Purchases", "Customers"];
+  const coreModules = ["Dashboard", "Chat", "HRMS", "Products", "Inventory", "Sales", "Purchases", "Customers"];
   const optionalModules = ["Accounting", "Logistics"];
   const systemModules = ["System"];
 
@@ -276,8 +278,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <Sidebar />
       </div>
 
-      {/* SCROLLABLE MAIN CONTENT AREA */}
-      <div className="main-layout flex flex-col flex-1 h-screen overflow-y-auto">
+      {/* MAIN CONTENT AREA */}
+      <div className="main-layout flex flex-col flex-1 h-screen overflow-hidden">
         {/* FIXED TOP NAVBAR - Blue #0056B8 */}
         <header className="topbar sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-primary px-6 shadow-md flex-shrink-0">
           <div className="flex items-center gap-4 lg:hidden">
@@ -462,12 +464,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* PAGE CONTENT - SCROLLS */}
-        <main className="page-content flex-1 overflow-auto bg-muted/30 p-6">
-          {children}
+        <main className="page-content flex-1 overflow-hidden bg-muted/30 p-6 flex flex-col min-h-0">
+          <div className="flex-1 min-h-0 overflow-auto">
+            {children}
+          </div>
         </main>
 
         {/* FOOTER - APPEARS AT END OF CONTENT */}
-        <Footer />
+        <div className="flex-shrink-0">
+          <Footer />
+        </div>
       </div>
     </div>
   );

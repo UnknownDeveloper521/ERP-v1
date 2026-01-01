@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { CalendarIcon, Download } from "lucide-react";
 
-export default function TripHistory(): JSX.Element {
+export default function TripHistory() {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const trips = [

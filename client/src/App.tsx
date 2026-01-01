@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import MainLayout from "@/components/layout/MainLayout";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
 import HRMS from "@/pages/HRMS";
 import Customers from "@/pages/Customers";
@@ -24,6 +26,8 @@ import MyAccount from "@/pages/MyAccount";
 
 import CRM from "@/pages/CRM";
 import PerformanceDashboard from "@/pages/PerformanceDashboard";
+
+import InternalChat from "@/pages/InternalChat";
 
 import Departments from "@/pages/hrms/Departments";
 import Recruitment from "@/pages/hrms/Recruitment";
@@ -49,199 +53,260 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       
       {/* Protected Routes wrapped in MainLayout */}
       <Route path="/">
         {() => (
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       
       <Route path="/hrms">
         {() => (
-          <MainLayout>
-            <HRDashboard />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <HRDashboard />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       
       {/* HRMS Sub-modules */}
       <Route path="/hrms/management">
         {() => (
-          <MainLayout>
-            <HRMS />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <HRMS />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/employees">
         {() => (
-          <MainLayout>
-            <HRMS />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <HRMS />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/roles">
         {() => (
-          <MainLayout>
-            <UsersRoles />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <UsersRoles />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/attendance">
         {() => (
-          <MainLayout>
-            <HRMS />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <HRMS />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/payroll">
         {() => (
-          <MainLayout>
-            <Payroll />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Payroll />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/departments">
         {() => (
-          <MainLayout>
-            <Departments />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Departments />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/recruitment">
         {() => (
-          <MainLayout>
-             <Recruitment />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+               <Recruitment />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/shifts">
         {() => (
-          <MainLayout>
-             <Shifts />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+               <Shifts />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route path="/hrms/ess">
         {() => (
-          <MainLayout>
-             <ESS />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+               <ESS />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/products">
         {() => (
-          <MainLayout>
-            <Products />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Products />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/inventory">
         {() => (
-          <MainLayout>
-            <Inventory />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Inventory />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/sales">
         {() => (
-          <MainLayout>
-            <Sales />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Sales />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/purchases">
         {() => (
-          <MainLayout>
-            <Purchases />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Purchases />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/customers">
         {() => (
-          <MainLayout>
-            <CRM />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <CRM />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       
       <Route path="/crm">
         {() => (
-          <MainLayout>
-            <CRM />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <CRM />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       
       <Route path="/accounting">
         {() => (
-          <MainLayout>
-            <Accounting />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Accounting />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       {/* Logistics Module Routes */}
       <Route path="/logistics">
         {() => (
-          <MainLayout>
-            <LogisticsDashboard />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <LogisticsDashboard />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
       
       <Route path="/logistics/new-trip">
         {() => (
-          <MainLayout>
-            <NewTrip />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <NewTrip />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/logistics/weighment/:id">
         {() => (
-          <MainLayout>
-            <Weighment />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Weighment />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/logistics/history">
         {() => (
-          <MainLayout>
-            <TripHistory />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <TripHistory />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/settings">
         {() => (
-          <MainLayout>
-            <UsersRoles />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <UsersRoles />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/my-account">
         {() => (
-          <MainLayout>
-            <MyAccount />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <MyAccount />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 
       <Route path="/performance">
         {() => (
-          <MainLayout>
-            <PerformanceDashboard />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <PerformanceDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        )}
+      </Route>
+
+      <Route path="/chat">
+        {() => (
+          <ProtectedRoute>
+            <MainLayout>
+              <InternalChat />
+            </MainLayout>
+          </ProtectedRoute>
         )}
       </Route>
 

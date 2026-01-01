@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getCurrentUser, onAuthStateChange, signInWithEmail, signOut, signUpWithEmail } from './supabase';
 
 // --- Types ---
 
@@ -23,6 +24,7 @@ export interface ModuleVisibility {
 
 export interface User {
   id: number;
+  supabaseId?: string;
   name: string;
   email: string;
   role: Role;
@@ -45,12 +47,14 @@ export interface AttendanceRecord {
 
 interface AuthContextType {
   user: User | null;
+  isAuthLoading: boolean;
   users: User[];
   roles: Role[];
   rolePermissions: RolePermissions;
   moduleVisibility: ModuleVisibility;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  register: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   addUser: (user: Omit<User, "id" | "status">) => void;
   updateUser: (id: number, data: Partial<User>) => void;
   deleteUser: (id: number) => void;
@@ -158,8 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize state from localStorage or defaults
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('currentUser');
-    return saved ? JSON.parse(saved) : DEFAULT_USERS[0];
+    return saved ? JSON.parse(saved) : null;
   });
+
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('users');
@@ -209,30 +215,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('attendance', JSON.stringify(attendance));
   }, [attendance]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-        const isValid = foundUser && foundUser.password === password;
-        
-        if (isValid && foundUser) {
-          if (foundUser.status === "Inactive") {
-            resolve(false);
-            return;
-          }
-          setUser(foundUser);
-          resolve(true);
-        } else {
-          console.log("Login failed - user:", foundUser?.email, "password match:", foundUser?.password === password);
-          resolve(false);
-        }
-      }, 800);
-    });
+  const upsertLocalUserFromEmail = (email: string, supabaseId?: string) => {
+    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existing) {
+      const updated = { ...existing, supabaseId };
+      setUsers(prev => prev.map(u => u.id === existing.id ? updated : u));
+      return updated;
+    }
+
+    const newUser: User = {
+      id: Math.max(...users.map(u => u.id), 0) + 1,
+      supabaseId,
+      name: email.split("@")[0] || "User",
+      email,
+      role: "Admin",
+      department: "General",
+      status: "Active",
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+    };
+    setUsers(prev => [...prev, newUser]);
+    return newUser;
   };
 
-  const logout = () => {
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const { data, error } = await signInWithEmail(email, password);
+    if (error) return false;
+
+    const supaUser = data.user;
+    if (!supaUser?.email) return false;
+
+    const localUser = upsertLocalUserFromEmail(supaUser.email, supaUser.id);
+    if (localUser.status === "Inactive") return false;
+    setUser(localUser);
+    return true;
+  };
+
+  const register = async (email: string, password: string) => {
+    const { error } = await signUpWithEmail(email, password);
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    await signOut();
     setUser(null);
   };
+
+  useEffect(() => {
+    let unsub: { data: { subscription: { unsubscribe: () => void } } } | null = null;
+
+    (async () => {
+      try {
+        const supaUser = await getCurrentUser();
+        if (supaUser?.email) {
+          const localUser = upsertLocalUserFromEmail(supaUser.email, supaUser.id);
+          setUser(localUser.status === "Inactive" ? null : localUser);
+        } else {
+          setUser(null);
+        }
+
+        unsub = onAuthStateChange((nextUser) => {
+          if (nextUser?.email) {
+            const localUser = upsertLocalUserFromEmail(nextUser.email, nextUser.id);
+            setUser(localUser.status === "Inactive" ? null : localUser);
+          } else {
+            setUser(null);
+          }
+        });
+      } finally {
+        setIsAuthLoading(false);
+      }
+    })();
+
+    return () => {
+      unsub?.data.subscription.unsubscribe();
+    };
+  }, []);
 
   const addUser = (userData: Omit<User, "id" | "status">) => {
     const newUser: User = {
@@ -283,7 +340,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isModuleVisible = (module: string): boolean => {
     if (!user) return false;
     const roleVisibility = moduleVisibility[user.role] || {};
-    return roleVisibility[module] ?? false;
+    return roleVisibility[module] ?? true;
   };
 
   const updateModuleVisibility = (role: Role, moduleVisibilities: { [module: string]: boolean }) => {
@@ -353,11 +410,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user,
+      isAuthLoading,
       users,
       roles: DEFAULT_ROLES,
       rolePermissions,
       moduleVisibility,
       login,
+      register,
       logout,
       addUser,
       updateUser,
