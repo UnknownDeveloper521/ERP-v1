@@ -27,7 +27,6 @@ type Profile = {
 
 export default function InternalChat() {
   const { user } = useAuth();
-
   const [search, setSearch] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [activeUserId, setActiveUserId] = useState<string | null>(null);
@@ -37,7 +36,6 @@ export default function InternalChat() {
   const [onlineByUserId, setOnlineByUserId] = useState<Record<string, boolean>>({});
   const [isSocketReady, setIsSocketReady] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-
   const myUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
