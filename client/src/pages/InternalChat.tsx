@@ -36,7 +36,11 @@ export default function InternalChat() {
   const [onlineByUserId, setOnlineByUserId] = useState<Record<string, boolean>>({});
   const [isSocketReady, setIsSocketReady] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const myUserIdRef = useRef<string | null>(null);
+  const messagesScrollRef = useRef<HTMLDivElement | null>(null);
+  const messagesViewportRef = useRef<HTMLDivElement | null>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -99,6 +103,20 @@ export default function InternalChat() {
       mounted = false;
     };
   }, [user?.name, user?.department, user?.role]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("chat:lastActiveUserId");
+    if (saved && !activeUserId) {
+      setActiveUserId(saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (activeUserId) {
+      localStorage.setItem("chat:lastActiveUserId", activeUserId);
+    }
+  }, [activeUserId]);
 
   useEffect(() => {
     let mounted = true;
@@ -174,28 +192,13 @@ export default function InternalChat() {
         { otherUserId: activeUserId },
         async (resp: { roomId?: string; error?: string }) => {
           if (!mounted) return;
-          if (!resp?.roomId) return;
+          if (!resp?.roomId) {
+            // Keep UI usable even if ensure fails
+            console.error("rooms:dm:ensure failed", resp?.error);
+            return;
+          }
 
           setRoomId(resp.roomId);
-
-          const { data: rows } = await supabase
-            .from("messages")
-            .select("id,room_id,sender_id,content,file_url,created_at")
-            .eq("room_id", resp.roomId)
-            .order("created_at", { ascending: true })
-            .limit(50);
-
-          if (!mounted) return;
-          setMessages(
-            (rows || []).map((r: any) => ({
-              id: r.id,
-              roomId: r.room_id,
-              senderId: r.sender_id,
-              content: r.content,
-              fileUrl: r.file_url,
-              createdAt: r.created_at,
-            }))
-          );
         }
       );
     })();
@@ -204,6 +207,99 @@ export default function InternalChat() {
       mounted = false;
     };
   }, [activeUserId, accessToken]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      if (!roomId) return;
+      if (!accessToken) return;
+
+      setIsHistoryLoading(true);
+      try {
+        const { data: rows, error } = await supabase
+          .from("messages")
+          .select("id,room_id,sender_id,content,file_url,created_at")
+          .eq("room_id", roomId)
+          .order("created_at", { ascending: true })
+          .limit(100);
+
+        if (!mounted) return;
+        if (error) {
+          console.error("Failed to load history", error);
+          return;
+        }
+
+        setMessages(
+          (rows || []).map((r: any) => ({
+            id: r.id,
+            roomId: r.room_id,
+            senderId: r.sender_id,
+            content: r.content,
+            fileUrl: r.file_url,
+            createdAt: r.created_at,
+          }))
+        );
+      } finally {
+        if (mounted) setIsHistoryLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [roomId, accessToken]);
+
+  useEffect(() => {
+    const root = messagesScrollRef.current;
+    if (!root) return;
+
+    const viewport = root.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    ) as HTMLDivElement | null;
+    if (!viewport) return;
+    messagesViewportRef.current = viewport;
+
+    const onScroll = () => {
+      const thresholdPx = 24;
+      const distanceFromBottom =
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      setShouldAutoScroll(distanceFromBottom <= thresholdPx);
+    };
+
+    viewport.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      viewport.removeEventListener("scroll", onScroll);
+    };
+  }, [roomId]);
+
+  const scrollMessagesToBottom = () => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTop = viewport.scrollHeight;
+  };
+
+  useEffect(() => {
+    // When a room opens (history loaded), jump to bottom.
+    if (!roomId) return;
+    // Let the DOM paint first.
+    requestAnimationFrame(() => {
+      scrollMessagesToBottom();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  useEffect(() => {
+    // When messages change, stick to bottom only if user is already at bottom.
+    if (!roomId) return;
+    if (!shouldAutoScroll) return;
+    requestAnimationFrame(() => {
+      scrollMessagesToBottom();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, roomId, shouldAutoScroll]);
 
   useEffect(() => {
     return () => {
@@ -324,7 +420,8 @@ export default function InternalChat() {
         </CardHeader>
 
         <CardContent className="flex-1 pt-0 min-h-0 flex flex-col">
-          <ScrollArea className="flex-1 pr-4">
+          <div ref={messagesScrollRef} className="flex-1 min-h-0">
+            <ScrollArea className="h-full pr-4">
             <div className="flex flex-col gap-3">
               {messages.length === 0 ? (
                 <div className="text-sm text-muted-foreground">
@@ -357,7 +454,8 @@ export default function InternalChat() {
                 })
               )}
             </div>
-          </ScrollArea>
+            </ScrollArea>
+          </div>
         </CardContent>
 
         <div className="border-t px-4 py-3">
